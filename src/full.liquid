@@ -15,6 +15,7 @@
 {% for r in reminders %}
   {% unless r.due_date %}{% assign dateless_count = dateless_count | plus: 1 %}{% endunless %}
 {% endfor %}
+{% capture reminder_icon %}<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>{% endcapture %}
 <div class="layout layout--top">
   <div class="columns">
     {% for pass in (1..2) %}
@@ -63,9 +64,7 @@
                       <path d="M5.5 1v3M10.5 1v3"></path>
                     </svg>
                   {% else %}
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <circle cx="8" cy="8" r="6.5"></circle>
-                    </svg>
+                    {{ reminder_icon }}
                   {% endif %}
                 </div>
                 <div class="content">
@@ -103,27 +102,24 @@
             {% for r in rs_ovd %}
               {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
               {% if rd < today %}
-                {% assign cur = r %}
                 <div class="item">
                   <div class="meta">
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <circle cx="8" cy="8" r="6.5"></circle>
-                    </svg>
+                    {{ reminder_icon }}
                   </div>
                   <div class="content">
-                    {% case cur.priority %}
+                    {% case r.priority %}
                     {% when 9 %}{% assign importance = "! " %}
                     {% when 5 %}{% assign importance = "!! " %}
                     {% when 1 %}{% assign importance = "!!! " %}
                     {% else %}{% assign importance = "" %}
                     {% endcase %}
-                    <span class="title title--small">{{ cur.title | prepend: importance }}</span>
-                    {% if cur.notes %}<span class="description">{{ cur.notes }}</span>{% endif %}
-                    {% assign tmod = cur.due_date | date: "%s" | plus: offset | modulo: 86400 %}
+                    <span class="title title--small">{{ r.title | prepend: importance }}</span>
+                    {% if r.notes %}<span class="description">{{ r.notes }}</span>{% endif %}
+                    {% assign tmod = r.due_date | date: "%s" | plus: offset | modulo: 86400 %}
                     {% if tmod == 0 %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}</span></div>
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ r.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}</span></div>
                     {% else %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}, {{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ r.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}, {{ r.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
                     {% endif %}
                   </div>
                 </div>
@@ -132,22 +128,19 @@
             {% if overdue_count > 0 and dateless_count > 0 %}<div class="divider"></div>{% endif %}
             {% for r in reminders | sort_natural: "title" %}
               {% unless r.due_date %}
-                {% assign cur = r %}
                 <div class="item">
                   <div class="meta">
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <circle cx="8" cy="8" r="6.5"></circle>
-                    </svg>
+                    {{ reminder_icon }}
                   </div>
                   <div class="content">
-                    {% case cur.priority %}
+                    {% case r.priority %}
                     {% when 9 %}{% assign importance = "! " %}
                     {% when 5 %}{% assign importance = "!! " %}
                     {% when 1 %}{% assign importance = "!!! " %}
                     {% else %}{% assign importance = "" %}
                     {% endcase %}
-                    <span class="title title--small">{{ cur.title | prepend: importance }}</span>
-                    {% if cur.notes %}<span class="description">{{ cur.notes }}</span>{% endif %}
+                    <span class="title title--small">{{ r.title | prepend: importance }}</span>
+                    {% if r.notes %}<span class="description">{{ r.notes }}</span>{% endif %}
                   </div>
                 </div>
               {% endunless %}
