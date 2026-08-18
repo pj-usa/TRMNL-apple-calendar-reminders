@@ -7,15 +7,7 @@
 {% assign overdue_count = 0 %}
 {% for r in reminders %}
   {% if r.due_date %}
-    {% if r.due_date contains "T" %}
-      {% if r.due_date contains "T00:00" %}
-        {% assign rd = r.due_date | date: "%Y-%m-%d" %}
-      {% else %}
-        {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-      {% endif %}
-    {% else %}
-      {% assign rd = r.due_date | date: "%Y-%m-%d" %}
-    {% endif %}
+    {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
     {% if rd < today %}{% assign overdue_count = overdue_count | plus: 1 %}{% endif %}
   {% endif %}
 {% endfor %}
@@ -26,11 +18,7 @@
 <div class="layout flex--top">
   <div class="columns">
     {% for pass in (1..2) %}
-      {% if pass == 1 %}
-        {% assign target = today %}
-      {% else %}
-        {% assign target = tomorrow %}
-      {% endif %}
+      {% if pass == 1 %}{% assign target = today %}{% else %}{% assign target = tomorrow %}{% endif %}
       <div class="column">
         <div class="list" data-overflow="true" data-overflow-counter="true">
           <span class="label">{% if pass == 1 %}{{ today_label }}{% if overdue_count > 0 %} (Overdue: {{ overdue_count }}){% endif %}{% else %}{{ tomorrow_label }}{% endif %}</span>
@@ -64,16 +52,7 @@
               {% assign ri = ri | plus: 1 %}
               {% assign kind = "reminder" %}
             {% endif %}
-            {% assign cd = cur.date_time | default: cur.due_date %}
-            {% if kind == "event" %}
-              {% assign cd = cd | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-            {% elsif cd contains "T" and cd contains "T00:00" %}
-              {% assign cd = cd | date: "%Y-%m-%d" %}
-            {% elsif cd contains "T" %}
-              {% assign cd = cd | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-            {% else %}
-              {% assign cd = cd | date: "%Y-%m-%d" %}
-            {% endif %}
+            {% assign cd = cur.date_time | default: cur.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
             {% if cd == target %}
               <div class="item">
                 <div class="meta">
@@ -90,7 +69,17 @@
                   {% endif %}
                 </div>
                 <div class="content">
-                  <span class="title title--small">{{ cur.summary | default: cur.title }}</span>
+                  {% if kind == "event" %}
+                    <span class="title title--small">{{ cur.summary }}</span>
+                  {% else %}
+                    {% case cur.priority %}
+                    {% when 9 %}{% assign importance = "! " %}
+                    {% when 5 %}{% assign importance = "!! " %}
+                    {% when 1 %}{% assign importance = "!!! " %}
+                    {% else %}{% assign importance = "" %}
+                    {% endcase %}
+                    <span class="title title--small">{{ cur.title | prepend: importance }}</span>
+                  {% endif %}
                   {% assign desc = cur.description | default: cur.notes %}
                   {% if desc %}<span class="description">{{ desc }}</span>{% endif %}
                   {% if kind == "event" %}
@@ -98,8 +87,8 @@
                       <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.date_time | date: "%s" | plus: offset | date: "%H:%M" }}{% if cur.end_full %} - {{ cur.end_full | date: "%s" | plus: offset | date: "%H:%M" }}{% endif %}</span></div>
                     {% endunless %}
                   {% else %}
-                    {% if cur.due_date contains "T" and cur.due_date contains "T00:00" %}
-                    {% elsif cur.due_date contains "T" %}
+                    {% assign tmod = cur.due_date | date: "%s" | plus: offset | modulo: 86400 %}
+                    {% if tmod != 0 %}
                       <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
                     {% endif %}
                   {% endif %}
@@ -112,18 +101,9 @@
             {% if overdue_count > 0 or dateless_count > 0 %}<div class="divider"></div>{% endif %}
             {% assign rs_ovd = reminders | where: "due_date" | sort: "due_date" | reverse %}
             {% for r in rs_ovd %}
-              {% if r.due_date contains "T" %}
-                {% if r.due_date contains "T00:00" %}
-                  {% assign rd = r.due_date | date: "%Y-%m-%d" %}
-                {% else %}
-                  {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-                {% endif %}
-              {% else %}
-                {% assign rd = r.due_date | date: "%Y-%m-%d" %}
-              {% endif %}
+              {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
               {% if rd < today %}
                 {% assign cur = r %}
-                {% assign kind = "reminder" %}
                 <div class="item">
                   <div class="meta">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -131,16 +111,19 @@
                     </svg>
                   </div>
                   <div class="content">
-                    <span class="title title--small">{{ cur.title }}</span>
+                    {% case cur.priority %}
+                    {% when 9 %}{% assign importance = "! " %}
+                    {% when 5 %}{% assign importance = "!! " %}
+                    {% when 1 %}{% assign importance = "!!! " %}
+                    {% else %}{% assign importance = "" %}
+                    {% endcase %}
+                    <span class="title title--small">{{ cur.title | prepend: importance }}</span>
                     {% if cur.notes %}<span class="description">{{ cur.notes }}</span>{% endif %}
-                    {% if cur.due_date contains "T" %}
-                      {% if cur.due_date contains "T00:00" %}
-                        <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%d.%m.%Y" }}</span></div>
-                      {% else %}
-                        <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}, {{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
-                      {% endif %}
+                    {% assign tmod = cur.due_date | date: "%s" | plus: offset | modulo: 86400 %}
+                    {% if tmod == 0 %}
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}</span></div>
                     {% else %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%d.%m.%Y" }}</span></div>
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}, {{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
                     {% endif %}
                   </div>
                 </div>
@@ -157,7 +140,13 @@
                     </svg>
                   </div>
                   <div class="content">
-                    <span class="title title--small">{{ cur.title }}</span>
+                    {% case cur.priority %}
+                    {% when 9 %}{% assign importance = "! " %}
+                    {% when 5 %}{% assign importance = "!! " %}
+                    {% when 1 %}{% assign importance = "!!! " %}
+                    {% else %}{% assign importance = "" %}
+                    {% endcase %}
+                    <span class="title title--small">{{ cur.title | prepend: importance }}</span>
                     {% if cur.notes %}<span class="description">{{ cur.notes }}</span>{% endif %}
                   </div>
                 </div>
