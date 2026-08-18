@@ -1,16 +1,66 @@
+{% assign offset = trmnl.user.utc_offset | default: 0 %}
+{% assign base_ts = trmnl.system.timestamp_utc | default: 0 %}
+{% assign today = base_ts | plus: offset | date: "%Y-%m-%d" %}
+{% assign tomorrow = base_ts | plus: 86400 | plus: offset | date: "%Y-%m-%d" %}
+{% assign today_label = base_ts | plus: offset | date: "%B %-d" %}
+{% assign tomorrow_label = base_ts | plus: 86400 | plus: offset | date: "%B %-d" %}
+{% assign overdue_count = 0 %}
+{% for r in reminders %}
+  {% if r.due_date %}
+    {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+    {% if rd < today %}{% assign overdue_count = overdue_count | plus: 1 %}{% endif %}
+  {% endif %}
+{% endfor %}
+{% assign dateless_count = 0 %}
+{% for r in reminders %}
+  {% unless r.due_date %}{% assign dateless_count = dateless_count | plus: 1 %}{% endunless %}
+{% endfor %}
 <div class="layout flex--top">
   <div class="columns">
-    {% for day in days %}
+    {% for pass in (1..2) %}
+      {% if pass == 1 %}
+        {% assign target = today %}
+      {% else %}
+        {% assign target = tomorrow %}
+      {% endif %}
       <div class="column">
         <div class="list" data-overflow="true" data-overflow-counter="true">
-          <span class="label">{{ day.label }}</span>
-          {% for item in day.items %}
-            {% if item.type == "divider" %}
-              <div class="divider"></div>
-            {% else %}
+          <span class="label">{% if pass == 1 %}{{ today_label }}{% if overdue_count > 0 %} (Overdue: {{ overdue_count }}){% endif %}{% else %}{{ tomorrow_label }}{% endif %}</span>
+
+          {% assign es = events | sort_natural: "summary" | sort: "date_time" %}
+          {% assign rs = reminders | where: "due_date" | sort_natural: "title" | sort: "due_date" %}
+          {% assign ei = 0 %}
+          {% assign ri = 0 %}
+          {% assign etot = es.size %}
+          {% assign rtot = rs.size %}
+          {% assign total = etot | plus: rtot %}
+          {% for n in (1..total) %}
+            {% if ei < etot and ri < rtot %}
+              {% assign et = es[ei].date_time %}
+              {% assign rt = rs[ri].due_date %}
+              {% if rt < et %}
+                {% assign cur = rs[ri] %}
+                {% assign ri = ri | plus: 1 %}
+                {% assign kind = "reminder" %}
+              {% else %}
+                {% assign cur = es[ei] %}
+                {% assign ei = ei | plus: 1 %}
+                {% assign kind = "event" %}
+              {% endif %}
+            {% elsif ei < etot %}
+              {% assign cur = es[ei] %}
+              {% assign ei = ei | plus: 1 %}
+              {% assign kind = "event" %}
+            {% elsif ri < rtot %}
+              {% assign cur = rs[ri] %}
+              {% assign ri = ri | plus: 1 %}
+              {% assign kind = "reminder" %}
+            {% endif %}
+            {% assign cd = cur.date_time | default: cur.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+            {% if cd == target %}
               <div class="item">
                 <div class="meta">
-                  {% if item.type == "event" %}
+                  {% if kind == "event" %}
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                       <rect x="1.5" y="2.5" width="13" height="12" rx="1.5"></rect>
                       <path d="M1.5 6.5h13"></path>
@@ -23,19 +73,67 @@
                   {% endif %}
                 </div>
                 <div class="content">
-                  <span class="title title--small">{{ item.title }}</span>
-                  {% if item.description %}
-                    <span class="description">{{ item.description }}</span>
-                  {% endif %}
-                  {% if item.time %}
-                    <div class="flex gap--xsmall">
-                      <span class="label label--small label--underline">{{ item.time }}</span>
-                    </div>
+                  <span class="title title--small">{{ cur.summary | default: cur.title }}</span>
+                  {% assign desc = cur.description | default: cur.notes %}
+                  {% if desc %}<span class="description">{{ desc }}</span>{% endif %}
+                  {% if kind == "event" and cur.all_day %}
+                    <div class="flex gap--xsmall"><span class="label label--small label--underline">all-day</span></div>
+                  {% elsif kind == "event" %}
+                    <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.date_time | date: "%s" | plus: offset | date: "%H:%M" }}{% if cur.end_full %} - {{ cur.end_full | date: "%s" | plus: offset | date: "%H:%M" }}{% endif %}</span></div>
+                  {% elsif cur.due_date contains "T" %}
+                    <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
+                  {% else %}
+                    <div class="flex gap--xsmall"><span class="label label--small label--underline">all-day</span></div>
                   {% endif %}
                 </div>
               </div>
             {% endif %}
           {% endfor %}
+
+          {% if pass == 1 %}
+            {% if overdue_count > 0 or dateless_count > 0 %}<div class="divider"></div>{% endif %}
+            {% assign rs_ovd = reminders | where: "due_date" | sort: "due_date" | reverse %}
+            {% for r in rs_ovd %}
+              {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+              {% if rd < today %}
+                {% assign cur = r %}
+                {% assign kind = "reminder" %}
+                <div class="item">
+                  <div class="meta">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <circle cx="8" cy="8" r="6.5"></circle>
+                    </svg>
+                  </div>
+                  <div class="content">
+                    <span class="title title--small">{{ cur.title }}</span>
+                    {% if cur.notes %}<span class="description">{{ cur.notes }}</span>{% endif %}
+                    {% if cur.due_date contains "T" %}
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
+                    {% else %}
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">all-day</span></div>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+            {% if overdue_count > 0 and dateless_count > 0 %}<div class="divider"></div>{% endif %}
+            {% for r in reminders | sort_natural: "title" %}
+              {% unless r.due_date %}
+                {% assign cur = r %}
+                <div class="item">
+                  <div class="meta">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <circle cx="8" cy="8" r="6.5"></circle>
+                    </svg>
+                  </div>
+                  <div class="content">
+                    <span class="title title--small">{{ cur.title }}</span>
+                    {% if cur.notes %}<span class="description">{{ cur.notes }}</span>{% endif %}
+                  </div>
+                </div>
+              {% endunless %}
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
     {% endfor %}
