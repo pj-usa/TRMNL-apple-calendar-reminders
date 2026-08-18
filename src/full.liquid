@@ -7,7 +7,15 @@
 {% assign overdue_count = 0 %}
 {% for r in reminders %}
   {% if r.due_date %}
-    {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+    {% if r.due_date contains "T" %}
+      {% if r.due_date contains "T00:00" %}
+        {% assign rd = r.due_date | date: "%Y-%m-%d" %}
+      {% else %}
+        {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+      {% endif %}
+    {% else %}
+      {% assign rd = r.due_date | date: "%Y-%m-%d" %}
+    {% endif %}
     {% if rd < today %}{% assign overdue_count = overdue_count | plus: 1 %}{% endif %}
   {% endif %}
 {% endfor %}
@@ -56,7 +64,16 @@
               {% assign ri = ri | plus: 1 %}
               {% assign kind = "reminder" %}
             {% endif %}
-            {% assign cd = cur.date_time | default: cur.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+            {% assign cd = cur.date_time | default: cur.due_date %}
+            {% if kind == "event" %}
+              {% assign cd = cd | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+            {% elsif cd contains "T" and cd contains "T00:00" %}
+              {% assign cd = cd | date: "%Y-%m-%d" %}
+            {% elsif cd contains "T" %}
+              {% assign cd = cd | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+            {% else %}
+              {% assign cd = cd | date: "%Y-%m-%d" %}
+            {% endif %}
             {% if cd == target %}
               <div class="item">
                 <div class="meta">
@@ -76,14 +93,15 @@
                   <span class="title title--small">{{ cur.summary | default: cur.title }}</span>
                   {% assign desc = cur.description | default: cur.notes %}
                   {% if desc %}<span class="description">{{ desc }}</span>{% endif %}
-                  {% if kind == "event" and cur.all_day %}
-                    <div class="flex gap--xsmall"><span class="label label--small label--underline">all-day</span></div>
-                  {% elsif kind == "event" %}
-                    <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.date_time | date: "%s" | plus: offset | date: "%H:%M" }}{% if cur.end_full %} - {{ cur.end_full | date: "%s" | plus: offset | date: "%H:%M" }}{% endif %}</span></div>
-                  {% elsif cur.due_date contains "T" %}
-                    <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
+                  {% if kind == "event" %}
+                    {% unless cur.all_day %}
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.date_time | date: "%s" | plus: offset | date: "%H:%M" }}{% if cur.end_full %} - {{ cur.end_full | date: "%s" | plus: offset | date: "%H:%M" }}{% endif %}</span></div>
+                    {% endunless %}
                   {% else %}
-                    <div class="flex gap--xsmall"><span class="label label--small label--underline">all-day</span></div>
+                    {% if cur.due_date contains "T" and cur.due_date contains "T00:00" %}
+                    {% elsif cur.due_date contains "T" %}
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
+                    {% endif %}
                   {% endif %}
                 </div>
               </div>
@@ -94,7 +112,15 @@
             {% if overdue_count > 0 or dateless_count > 0 %}<div class="divider"></div>{% endif %}
             {% assign rs_ovd = reminders | where: "due_date" | sort: "due_date" | reverse %}
             {% for r in rs_ovd %}
-              {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+              {% if r.due_date contains "T" %}
+                {% if r.due_date contains "T00:00" %}
+                  {% assign rd = r.due_date | date: "%Y-%m-%d" %}
+                {% else %}
+                  {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+                {% endif %}
+              {% else %}
+                {% assign rd = r.due_date | date: "%Y-%m-%d" %}
+              {% endif %}
               {% if rd < today %}
                 {% assign cur = r %}
                 {% assign kind = "reminder" %}
@@ -108,9 +134,13 @@
                     <span class="title title--small">{{ cur.title }}</span>
                     {% if cur.notes %}<span class="description">{{ cur.notes }}</span>{% endif %}
                     {% if cur.due_date contains "T" %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
+                      {% if cur.due_date contains "T00:00" %}
+                        <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%d.%m.%Y" }}</span></div>
+                      {% else %}
+                        <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}, {{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
+                      {% endif %}
                     {% else %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">all-day</span></div>
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%d.%m.%Y" }}</span></div>
                     {% endif %}
                   </div>
                 </div>
