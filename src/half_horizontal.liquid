@@ -15,6 +15,7 @@
 {% for r in reminders %}
   {% unless r.due_date %}{% assign dateless_count = dateless_count | plus: 1 %}{% endunless %}
 {% endfor %}
+{% capture reminder_icon %}<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>{% endcapture %}
 <div class="layout layout--top">
   <div class="columns">
     {% for pass in (1..2) %}
@@ -63,7 +64,7 @@
                       <path d="M5.5 1v3M10.5 1v3"></path>
                     </svg>
                   {% else %}
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>
+                    {{ reminder_icon }}
                   {% endif %}
                 </div>
                 <div class="content">
@@ -103,7 +104,7 @@
               {% if rd < today %}
                 <div class="item">
                   <div class="meta">
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>
+                    {{ reminder_icon }}
                   </div>
                   <div class="content">
                     {% case r.priority %}
@@ -129,7 +130,7 @@
               {% unless r.due_date %}
                 <div class="item">
                   <div class="meta">
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>
+                    {{ reminder_icon }}
                   </div>
                   <div class="content">
                     {% case r.priority %}
