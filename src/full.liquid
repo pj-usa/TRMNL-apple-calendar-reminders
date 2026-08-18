@@ -21,7 +21,7 @@
       {% if pass == 1 %}{% assign target = today %}{% else %}{% assign target = tomorrow %}{% endif %}
       <div class="column">
         <div class="list" data-overflow="true" data-overflow-counter="true">
-          <span class="label">{% if pass == 1 %}{{ today_label }}{% if overdue_count > 0 %} (Overdue: {{ overdue_count }}){% endif %}{% else %}{{ tomorrow_label }}{% endif %}</span>
+          <span class="label">{% if pass == 1 %}{{ today_label }}{% else %}{{ tomorrow_label }}{% endif %}</span>
 
           {% assign es = events | sort_natural: "summary" | sort: "date_time" %}
           {% assign rs = reminders | where: "due_date" | sort_natural: "title" | sort: "due_date" %}
@@ -57,13 +57,13 @@
               <div class="item">
                 <div class="meta">
                   {% if kind == "event" %}
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <svg width="15.2" height="15.2" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                       <rect x="1.5" y="2.5" width="13" height="12" rx="1.5"></rect>
                       <path d="M1.5 6.5h13"></path>
                       <path d="M5.5 1v3M10.5 1v3"></path>
                     </svg>
                   {% else %}
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <svg width="15.2" height="15.2" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                       <circle cx="8" cy="8" r="6.5"></circle>
                     </svg>
                   {% endif %}
@@ -106,7 +106,7 @@
                 {% assign cur = r %}
                 <div class="item">
                   <div class="meta">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <svg width="15.2" height="15.2" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                       <circle cx="8" cy="8" r="6.5"></circle>
                     </svg>
                   </div>
@@ -135,7 +135,7 @@
                 {% assign cur = r %}
                 <div class="item">
                   <div class="meta">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <svg width="15.2" height="15.2" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                       <circle cx="8" cy="8" r="6.5"></circle>
                     </svg>
                   </div>
