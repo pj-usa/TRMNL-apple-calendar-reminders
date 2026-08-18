@@ -15,7 +15,7 @@
 {% for r in reminders %}
   {% unless r.due_date %}{% assign dateless_count = dateless_count | plus: 1 %}{% endunless %}
 {% endfor %}
-<div class="layout flex--top">
+<div class="layout layout--top">
   <div class="columns">
     {% for pass in (1..2) %}
       {% if pass == 1 %}{% assign target = today %}{% else %}{% assign target = tomorrow %}{% endif %}
