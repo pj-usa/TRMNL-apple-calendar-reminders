@@ -13,6 +13,17 @@
 {% for r in reminders %}
   {% unless r.due_date %}{% assign dateless_count = dateless_count | plus: 1 %}{% endunless %}
 {% endfor %}
+{% assign today_count = 0 %}
+{% for e in events %}
+  {% assign ed = e.date_time | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+  {% if ed == today %}{% assign today_count = today_count | plus: 1 %}{% endif %}
+{% endfor %}
+{% for r in reminders %}
+  {% if r.due_date %}
+    {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+    {% if rd == today %}{% assign today_count = today_count | plus: 1 %}{% endif %}
+  {% endif %}
+{% endfor %}
 {% capture reminder_icon %}<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>{% endcapture %}
 <div class="layout layout--top">
   <div class="list" data-overflow="true" data-overflow-counter="true">
@@ -90,7 +101,7 @@
       {% endif %}
     {% endfor %}
 
-    {% if overdue_count > 0 or dateless_count > 0 %}<div class="divider"></div>{% endif %}
+    {% if today_count > 0 and (overdue_count > 0 or dateless_count > 0) %}<div class="divider"></div>{% endif %}
     {% assign rs_ovd = reminders | where: "due_date" | sort: "due_date" | reverse %}
     {% for r in rs_ovd %}
       {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
