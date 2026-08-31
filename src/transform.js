@@ -1,6 +1,5 @@
 function run(input) {
   const user = (input && input.trmnl && input.trmnl.user) || {};
-  // ponytail: offset seconds, same math as the Liquid (base_ts | plus: utc_offset | date: "%Y-%m-%d")
   const offset = user.utc_offset || 0;
   const ymd = (ms) => new Date(ms + offset * 1000).toISOString().slice(0, 10);
   const now = Date.now();
