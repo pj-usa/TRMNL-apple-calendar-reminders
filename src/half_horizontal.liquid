@@ -82,15 +82,14 @@
                   <span class="title title--small">{{ cur.prefix }}{{ cur.title | escape }}</span>
                   {% if cur.description %}<span class="description">{{ cur.description | escape }}</span>{% endif %}
                   {% if kind == "event" %}
-                    {% if cur.start_full %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.start_full | date: "%s" | plus: offset | date: "%b %-d, %H:%M" }} - {{ cur.end_full | date: "%s" | plus: offset | date: "%b %-d, %H:%M" }}</span></div>
-                    {% elsif cur.all_day == false %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.date_time | date: "%s" | plus: offset | date: "%H:%M" }}{% if cur.end_full %} - {{ cur.end_full | date: "%s" | plus: offset | date: "%H:%M" }}{% endif %}</span></div>
+                    {% if cur.range %}
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.range | escape }}</span></div>
+                    {% elsif cur.time_label %}
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.time_label | escape }}</span></div>
                     {% endif %}
                   {% else %}
-                    {% assign tmod = cur.due_date | date: "%s" | plus: offset | modulo: 86400 %}
-                    {% if tmod != 0 %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
+                    {% if cur.due_time_label %}
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_time_label | escape }}</span></div>
                     {% endif %}
                   {% endif %}
                 </div>
@@ -111,11 +110,8 @@
                   <div class="content">
                     <span class="title title--small">{{ r.prefix }}{{ r.title | escape }}</span>
                     {% if r.description %}<span class="description">{{ r.description | escape }}</span>{% endif %}
-                    {% assign tmod = r.due_date | date: "%s" | plus: offset | modulo: 86400 %}
-                    {% if tmod == 0 %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ r.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}</span></div>
-                    {% else %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ r.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}, {{ r.due_date | date: "%s" | plus: offset | date: "%H:%M" }}</span></div>
+                    {% if r.due_date_label %}
+                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ r.due_date_label | escape }}</span></div>
                     {% endif %}
                   </div>
                 </div>

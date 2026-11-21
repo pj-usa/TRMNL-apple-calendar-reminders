@@ -15,6 +15,14 @@ function run(input) {
     return s.length > n ? s.slice(0, n) + "..." : s;
   };
   const prefix = (p) => (p === 1 ? "!!! " : p === 5 ? "!! " : p === 9 ? "! " : "");
+  const numericDate = (ms) => {
+    const d = new Date(ms + offset * 1000);
+    return (d.getUTCDate() < 10 ? "0" : "") + d.getUTCDate() + "." + (d.getUTCMonth() < 9 ? "0" : "") + (d.getUTCMonth() + 1) + "." + d.getUTCFullYear();
+  };
+  const clock = (ms) => {
+    const d = new Date(ms + offset * 1000);
+    return (d.getUTCHours() < 10 ? "0" : "") + d.getUTCHours() + ":" + (d.getUTCMinutes() < 10 ? "0" : "") + d.getUTCMinutes();
+  };
   const addDays = (date, n) => new Date(Date.parse(date + "T00:00:00.000Z") + n * 86400000).toISOString().slice(0, 10);
   const midnight = (date) => Date.parse(date + "T00:00:00.000Z") - offset * 1000;
   const atMidnight = (ms) => {
@@ -44,14 +52,17 @@ function run(input) {
         title: clip(e.summary, 100),
         date_time: new Date(multi || e.all_day ? occurs : startMs).toISOString(),
         // Multi-day events sit above all-day events; ties stay alphabetical.
-        sort_time: new Date(multi ? occurs - 1000 : e.all_day ? occurs : startMs).toISOString(),
-        all_day: !!e.all_day
+        sort_time: new Date(multi ? occurs - 1000 : e.all_day ? occurs : startMs).toISOString()
       };
       const description = clip(e.description, 200);
-      const end = text(e.end_full);
       if (description) event.description = description;
-      if (multi && !event.all_day) event.start_full = new Date(startMs).toISOString();
-      if (end && !event.all_day) event.end_full = multi ? new Date(endMs).toISOString() : end;
+      if (multi) {
+        event.range = e.all_day
+          ? numericDate(startMs) + " - " + numericDate(midnight(lastDate))
+          : numericDate(startMs) + ", " + clock(startMs) + " - " + numericDate(endMs) + ", " + clock(endMs);
+      } else if (!e.all_day) {
+        event.time_label = clock(startMs) + (Number.isFinite(endMs) ? " - " + clock(endMs) : "");
+      }
       events.push(event);
     });
   });
@@ -64,11 +75,21 @@ function run(input) {
       return !r.due_date || !d || d <= tomorrow;
     })
     .map((r) => {
-      const due = day(r.due_date) ? text(r.due_date) : "";
+      const dueDate = day(r.due_date);
+      const due = dueDate ? text(r.due_date) : "";
+      const dueMs = due ? Date.parse(due) : NaN;
       const p = prefix(Number(r.priority));
       const description = clip(r.notes, 200);
       const reminder = { title: clip(r.title, 100) };
-      if (due) reminder.due_date = due;
+      if (due) {
+        reminder.due_date = due;
+        if (atMidnight(dueMs)) {
+          reminder.due_date_label = numericDate(dueMs);
+        } else {
+          if (dueDate === today || dueDate === tomorrow) reminder.due_time_label = clock(dueMs);
+          reminder.due_date_label = numericDate(dueMs) + ", " + clock(dueMs);
+        }
+      }
       if (p) reminder.prefix = p;
       if (description) reminder.description = description;
       return reminder;
