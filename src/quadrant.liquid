@@ -24,8 +24,8 @@
     {% if rd == today %}{% assign today_count = today_count | plus: 1 %}{% endif %}
   {% endif %}
 {% endfor %}
-{% assign es = events | sort_natural: "title" | sort: "date_time" %}
-{% assign rs = reminders | where: "due_date" | sort_natural: "title" | sort: "due_date" %}
+{% assign es = events %}
+{% assign rs = reminders | where: "due_date" %}
 {% capture reminder_icon %}<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>{% endcapture %}
 <div class="layout layout--top">
   <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
@@ -38,7 +38,7 @@
     {% assign total = etot | plus: rtot %}
     {% for n in (1..total) %}
       {% if ei < etot and ri < rtot %}
-        {% assign et = es[ei].date_time %}
+        {% assign et = es[ei].sort_time %}
         {% assign rt = rs[ri].due_date %}
         {% if rt < et %}
           {% assign cur = rs[ri] %}
@@ -76,9 +76,11 @@
             <span class="title title--small">{{ cur.prefix }}{{ cur.title | escape }}</span>
             {% if cur.description %}<span class="description">{{ cur.description | escape }}</span>{% endif %}
             {% if kind == "event" %}
-              {% unless cur.all_day %}
+              {% if cur.start_full %}
+                <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.start_full | date: "%s" | plus: offset | date: "%b %-d, %H:%M" }} - {{ cur.end_full | date: "%s" | plus: offset | date: "%b %-d, %H:%M" }}</span></div>
+              {% elsif cur.all_day == false %}
                 <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.date_time | date: "%s" | plus: offset | date: "%H:%M" }}{% if cur.end_full %} - {{ cur.end_full | date: "%s" | plus: offset | date: "%H:%M" }}{% endif %}</span></div>
-              {% endunless %}
+              {% endif %}
             {% else %}
               {% assign tmod = cur.due_date | date: "%s" | plus: offset | modulo: 86400 %}
               {% if tmod != 0 %}
@@ -91,7 +93,7 @@
     {% endfor %}
 
     {% if today_count > 0 and (overdue_count > 0 or dateless_count > 0) %}<div class="divider"></div>{% endif %}
-    {% assign rs_ovd = reminders | where: "due_date" | sort: "due_date" | reverse %}
+    {% assign rs_ovd = rs | reverse %}
     {% for r in rs_ovd %}
       {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
       {% if rd < today %}
@@ -113,7 +115,7 @@
       {% endif %}
     {% endfor %}
     {% if overdue_count > 0 and dateless_count > 0 %}<div class="divider"></div>{% endif %}
-    {% for r in reminders | sort_natural: "title" %}
+    {% for r in reminders %}
       {% unless r.due_date %}
         <div class="item">
           <div class="meta">
