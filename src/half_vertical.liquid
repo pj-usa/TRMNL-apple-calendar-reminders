@@ -24,13 +24,13 @@
     {% if rd == today %}{% assign today_count = today_count | plus: 1 %}{% endif %}
   {% endif %}
 {% endfor %}
+{% assign es = events | sort_natural: "title" | sort: "date_time" %}
+{% assign rs = reminders | where: "due_date" | sort_natural: "title" | sort: "due_date" %}
 {% capture reminder_icon %}<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>{% endcapture %}
 <div class="layout layout--top">
-  <div class="list" data-overflow="true" data-overflow-counter="true">
+  <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
     <span class="label">{{ today_label }}</span>
 
-    {% assign es = events | sort_natural: "summary" | sort: "date_time" %}
-    {% assign rs = reminders | where: "due_date" | sort_natural: "title" | sort: "due_date" %}
     {% assign ei = 0 %}
     {% assign ri = 0 %}
     {% assign etot = es.size %}
@@ -73,19 +73,8 @@
             {% endif %}
           </div>
           <div class="content">
-            {% if kind == "event" %}
-              <span class="title title--small">{{ cur.summary }}</span>
-            {% else %}
-              {% case cur.priority %}
-              {% when 9 %}{% assign importance = "! " %}
-              {% when 5 %}{% assign importance = "!! " %}
-              {% when 1 %}{% assign importance = "!!! " %}
-              {% else %}{% assign importance = "" %}
-              {% endcase %}
-              <span class="title title--small">{{ cur.title | prepend: importance }}</span>
-            {% endif %}
-            {% assign desc = cur.description | default: cur.notes %}
-            {% if desc %}<span class="description">{{ desc }}</span>{% endif %}
+            <span class="title title--small">{{ cur.prefix }}{{ cur.title | escape }}</span>
+            {% if cur.description %}<span class="description">{{ cur.description | escape }}</span>{% endif %}
             {% if kind == "event" %}
               {% unless cur.all_day %}
                 <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.date_time | date: "%s" | plus: offset | date: "%H:%M" }}{% if cur.end_full %} - {{ cur.end_full | date: "%s" | plus: offset | date: "%H:%M" }}{% endif %}</span></div>
@@ -111,14 +100,8 @@
             {{ reminder_icon }}
           </div>
           <div class="content">
-            {% case r.priority %}
-            {% when 9 %}{% assign importance = "! " %}
-            {% when 5 %}{% assign importance = "!! " %}
-            {% when 1 %}{% assign importance = "!!! " %}
-            {% else %}{% assign importance = "" %}
-            {% endcase %}
-            <span class="title title--small">{{ r.title | prepend: importance }}</span>
-            {% if r.notes %}<span class="description">{{ r.notes }}</span>{% endif %}
+            <span class="title title--small">{{ r.prefix }}{{ r.title | escape }}</span>
+            {% if r.description %}<span class="description">{{ r.description | escape }}</span>{% endif %}
             {% assign tmod = r.due_date | date: "%s" | plus: offset | modulo: 86400 %}
             {% if tmod == 0 %}
               <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ r.due_date | date: "%s" | plus: offset | date: "%d.%m.%Y" }}</span></div>
@@ -137,14 +120,8 @@
             {{ reminder_icon }}
           </div>
           <div class="content">
-            {% case r.priority %}
-            {% when 9 %}{% assign importance = "! " %}
-            {% when 5 %}{% assign importance = "!! " %}
-            {% when 1 %}{% assign importance = "!!! " %}
-            {% else %}{% assign importance = "" %}
-            {% endcase %}
-            <span class="title title--small">{{ r.title | prepend: importance }}</span>
-            {% if r.notes %}<span class="description">{{ r.notes }}</span>{% endif %}
+            <span class="title title--small">{{ r.prefix }}{{ r.title | escape }}</span>
+            {% if r.description %}<span class="description">{{ r.description | escape }}</span>{% endif %}
           </div>
         </div>
       {% endunless %}
@@ -153,8 +130,6 @@
 </div>
 <div class="title_bar">
   <img class="image" src="https://trmnl.com/images/plugins/trmnl--render.svg">
-  <span class="title">
-    {{ trmnl.plugin_settings.instance_name }}
-  </span>
+  <span class="title">{{ trmnl.plugin_settings.instance_name | escape }}</span>
   <span class="instance"></span>
 </div>
