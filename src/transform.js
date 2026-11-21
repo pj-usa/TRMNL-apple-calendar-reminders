@@ -90,9 +90,5 @@ function run(input) {
     });
   reminders.sort((a, b) => (a.due_date || "").localeCompare(b.due_date || "") || a.title.localeCompare(b.title));
 
-  const overdue = reminders
-    .filter((r) => r.due_date && day(r.due_date) < today)
-    .sort((a, b) => b.due_date.localeCompare(a.due_date) || a.title.localeCompare(b.title));
-
-  return { events, reminders, overdue };
+  return { events, reminders };
 }
