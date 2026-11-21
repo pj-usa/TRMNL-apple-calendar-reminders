@@ -2,13 +2,7 @@
 {% assign base_ts = trmnl.system.timestamp_utc | default: 0 %}
 {% assign today = base_ts | plus: offset | date: "%Y-%m-%d" %}
 {% assign today_label = base_ts | plus: offset | date: "%B %-d" %}
-{% assign overdue_count = 0 %}
-{% for r in reminders %}
-  {% if r.due_date %}
-    {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-    {% if rd < today %}{% assign overdue_count = overdue_count | plus: 1 %}{% endif %}
-  {% endif %}
-{% endfor %}
+{% assign overdue_count = overdue.size | default: 0 %}
 {% assign dateless_count = 0 %}
 {% for r in reminders %}
   {% unless r.due_date %}{% assign dateless_count = dateless_count | plus: 1 %}{% endunless %}
@@ -92,23 +86,19 @@
     {% endfor %}
 
     {% if today_count > 0 and (overdue_count > 0 or dateless_count > 0) %}<div class="divider"></div>{% endif %}
-    {% assign rs_ovd = rs | reverse %}
-    {% for r in rs_ovd %}
-      {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-      {% if rd < today %}
-        <div class="item">
-          <div class="meta">
-            {{ reminder_icon }}
-          </div>
-          <div class="content">
-            <span class="title title--small">{{ r.prefix }}{{ r.title | escape }}</span>
-            {% if r.description %}<span class="description">{{ r.description | escape }}</span>{% endif %}
-            {% if r.due_date_label %}
-              <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ r.due_date_label | escape }}</span></div>
-            {% endif %}
-          </div>
+    {% for r in overdue %}
+      <div class="item">
+        <div class="meta">
+          {{ reminder_icon }}
         </div>
-      {% endif %}
+        <div class="content">
+          <span class="title title--small">{{ r.prefix }}{{ r.title | escape }}</span>
+          {% if r.description %}<span class="description">{{ r.description | escape }}</span>{% endif %}
+          {% if r.due_date_label %}
+            <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ r.due_date_label | escape }}</span></div>
+          {% endif %}
+        </div>
+      </div>
     {% endfor %}
     {% if overdue_count > 0 and dateless_count > 0 %}<div class="divider"></div>{% endif %}
     {% for r in reminders %}

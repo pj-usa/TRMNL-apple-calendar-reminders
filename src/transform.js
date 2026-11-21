@@ -15,14 +15,8 @@ function run(input) {
     return s.length > n ? s.slice(0, n) + "..." : s;
   };
   const prefix = (p) => (p === 1 ? "!!! " : p === 5 ? "!! " : p === 9 ? "! " : "");
-  const numericDate = (ms) => {
-    const d = new Date(ms + offset * 1000);
-    return (d.getUTCDate() < 10 ? "0" : "") + d.getUTCDate() + "." + (d.getUTCMonth() < 9 ? "0" : "") + (d.getUTCMonth() + 1) + "." + d.getUTCFullYear();
-  };
-  const clock = (ms) => {
-    const d = new Date(ms + offset * 1000);
-    return (d.getUTCHours() < 10 ? "0" : "") + d.getUTCHours() + ":" + (d.getUTCMinutes() < 10 ? "0" : "") + d.getUTCMinutes();
-  };
+  const numericDate = (ms) => ymd(ms).split("-").reverse().join(".");
+  const clock = (ms) => new Date(ms + offset * 1000).toISOString().slice(11, 16);
   const addDays = (date, n) => new Date(Date.parse(date + "T00:00:00.000Z") + n * 86400000).toISOString().slice(0, 10);
   const midnight = (date) => Date.parse(date + "T00:00:00.000Z") - offset * 1000;
   const atMidnight = (ms) => {
@@ -96,5 +90,9 @@ function run(input) {
     });
   reminders.sort((a, b) => (a.due_date || "").localeCompare(b.due_date || "") || a.title.localeCompare(b.title));
 
-  return { events, reminders };
+  const overdue = reminders
+    .filter((r) => r.due_date && day(r.due_date) < today)
+    .sort((a, b) => b.due_date.localeCompare(a.due_date) || a.title.localeCompare(b.title));
+
+  return { events, reminders, overdue };
 }
