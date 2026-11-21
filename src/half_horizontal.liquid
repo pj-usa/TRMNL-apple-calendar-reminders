@@ -81,16 +81,9 @@
                 <div class="content">
                   <span class="title title--small">{{ cur.prefix }}{{ cur.title | escape }}</span>
                   {% if cur.description %}<span class="description">{{ cur.description | escape }}</span>{% endif %}
-                  {% if kind == "event" %}
-                    {% if cur.range %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.range | escape }}</span></div>
-                    {% elsif cur.time_label %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.time_label | escape }}</span></div>
-                    {% endif %}
-                  {% else %}
-                    {% if cur.due_time_label %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ cur.due_time_label | escape }}</span></div>
-                    {% endif %}
+                  {% assign item_label = cur.range | default: cur.time_label | default: cur.due_time_label %}
+                  {% if item_label %}
+                    <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ item_label | escape }}</span></div>
                   {% endif %}
                 </div>
               </div>

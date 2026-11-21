@@ -17,8 +17,8 @@ function run(input) {
   const prefix = (p) => (p === 1 ? "!!! " : p === 5 ? "!! " : p === 9 ? "! " : "");
   const numericDate = (ms) => ymd(ms).split("-").reverse().join(".");
   const clock = (ms) => new Date(ms + offset * 1000).toISOString().slice(11, 16);
-  const addDays = (date, n) => new Date(Date.parse(date + "T00:00:00.000Z") + n * 86400000).toISOString().slice(0, 10);
   const midnight = (date) => Date.parse(date + "T00:00:00.000Z") - offset * 1000;
+  const addDays = (date, n) => ymd(midnight(date) + n * 86400000);
   const atMidnight = (ms) => {
     const d = new Date(ms + offset * 1000);
     return d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() + d.getUTCMilliseconds() === 0;
