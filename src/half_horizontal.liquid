@@ -1,14 +1,14 @@
 <div class="layout layout--top">
   <div class="columns" style="height:100%;align-items:stretch">
     <div class="column" style="justify-content:flex-start">
-      <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
-        {% render "day_items", target: today, heading: today_label, events: events, reminders: rs, offset: offset %}
-        {% render "today_extras", events: events, dated: rs, all: reminders, offset: offset, today: today %}
+      <div class="list" data-overflow="true" data-overflow-counter="true">
+        {% render "day_items", target: today, heading: today_label, events: events, reminders: dated_reminders, offset: offset %}
+        {% render "today_extras", events: events, dated: dated_reminders, all: reminders, offset: offset, today: today %}
       </div>
     </div>
     <div class="column" style="justify-content:flex-start">
-      <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
-        {% render "day_items", target: tomorrow, heading: tomorrow_label, events: events, reminders: rs, offset: offset %}
+      <div class="list" data-overflow="true" data-overflow-counter="true">
+        {% render "day_items", target: tomorrow, heading: tomorrow_label, events: events, reminders: dated_reminders, offset: offset %}
       </div>
     </div>
   </div>

@@ -4,7 +4,7 @@
 {% assign tomorrow = base_ts | plus: 86400 | plus: offset | date: "%Y-%m-%d" %}
 {% assign today_label = base_ts | plus: offset | date: "%B %-d" %}
 {% assign tomorrow_label = base_ts | plus: 86400 | plus: offset | date: "%B %-d" %}
-{% assign rs = reminders | where: "due_date" %}
+{% assign dated_reminders = reminders | where: "due_date" %}
 
 {% template item %}
 <div class="item">
@@ -56,7 +56,7 @@
     {% render "item", item: cur %}
   {% endif %}
 {% endfor %}
-{% comment %}Tail flush: render anything a future for-loop cap left unconsumed.{% endcomment %}
+{% comment %}Guard against Liquid's 50-iteration for-loop cap; flush the rest.{% endcomment %}
 {% for event in events offset: event_index %}
   {% assign local_date = event.date_time | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
   {% if local_date == target %}{% render "item", item: event %}{% endif %}
@@ -96,6 +96,5 @@
 <div class="title_bar">
   <img class="image" src="https://trmnl.com/images/plugins/trmnl--render.svg">
   <span class="title">{{ name | escape }}</span>
-  <span class="instance"></span>
 </div>
 {% endtemplate %}
