@@ -3,7 +3,7 @@
     <div class="column" style="justify-content:flex-start">
       <div class="list" data-overflow="true" data-overflow-counter="true">
         {% render "day_items", target: today, heading: today_label, events: events, reminders: dated_reminders, offset: offset %}
-        {% render "today_extras", events: events, dated: dated_reminders, all: reminders, offset: offset, today: today %}
+        {% render "today_extras", events: events, dated: dated_reminders, reminders: reminders, offset: offset, today: today %}
       </div>
     </div>
     <div class="column" style="justify-content:flex-start">

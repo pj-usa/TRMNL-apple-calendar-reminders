@@ -1,7 +1,7 @@
 <div class="layout layout--top">
   <div class="list h--full" data-overflow="true" data-overflow-counter="true">
     {% render "day_items", target: today, heading: today_label, events: events, reminders: dated_reminders, offset: offset %}
-    {% render "today_extras", events: events, dated: dated_reminders, all: reminders, offset: offset, today: today %}
+    {% render "today_extras", events: events, dated: dated_reminders, reminders: reminders, offset: offset, today: today %}
   </div>
 </div>
 {% render "title_bar", name: trmnl.plugin_settings.instance_name %}
