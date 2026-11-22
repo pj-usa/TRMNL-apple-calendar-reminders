@@ -1,29 +1,30 @@
 function run(input) {
-  const user = (input && input.trmnl && input.trmnl.user) || {};
+  input = input || {};
+  const user = (input.trmnl && input.trmnl.user) || {};
   const offset = user.utc_offset || 0;
-  const ymd = (ms) => new Date(ms + offset * 1000).toISOString().slice(0, 10);
+  const local = (ms) => new Date(ms + offset * 1000);
+  const ymd = (ms) => local(ms).toISOString().slice(0, 10);
   const now = Date.now();
   const today = ymd(now);
   const tomorrow = ymd(now + 86400000);
-  const text = (s) => String(s || "").trim();
   const clip = (s, n) => {
-    s = text(s);
-    return s.length > n ? s.slice(0, n) + "..." : s;
+    const value = String(s || "").trim();
+    return value.length > n ? value.slice(0, n) + "..." : value;
   };
   const prefix = (p) => (p === 1 ? "!!! " : p === 5 ? "!! " : p === 9 ? "! " : "");
   const numericDate = (ms) => ymd(ms).split("-").reverse().join(".");
-  const clock = (ms) => new Date(ms + offset * 1000).toISOString().slice(11, 16);
+  const clock = (ms) => local(ms).toISOString().slice(11, 16);
   const midnight = (date) => Date.parse(date + "T00:00:00.000Z") - offset * 1000;
   const addDays = (date, n) => ymd(midnight(date) + n * 86400000);
   const atMidnight = (ms) => {
-    const d = new Date(ms + offset * 1000);
+    const d = local(ms);
     return (
       d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() + d.getUTCMilliseconds() === 0
     );
   };
 
   const events = [];
-  ((input && input.events) || []).forEach((e) => {
+  (input.events || []).forEach((e) => {
     const startMs = Date.parse(e.date_time || e.start_full);
     if (!Number.isFinite(startMs)) return;
 
@@ -65,7 +66,7 @@ function run(input) {
   );
 
   const reminders = [];
-  ((input && input.reminders) || []).forEach((r) => {
+  (input.reminders || []).forEach((r) => {
     const dueMs = Date.parse(r.due_date);
     const dueDate = Number.isFinite(dueMs) ? ymd(dueMs) : "";
     // Keep unparseable due dates visible as dateless instead of dropping the reminder.
