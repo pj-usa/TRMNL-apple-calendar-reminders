@@ -12,7 +12,8 @@ function run(input) {
     return value.length > n ? value.slice(0, n) + "..." : value;
   };
   const prefix = (p) => (p === 1 ? "!!! " : p === 5 ? "!! " : p === 9 ? "! " : "");
-  const numericDate = (ms) => ymd(ms).split("-").reverse().join(".");
+  const dottedDate = (date) => date.split("-").reverse().join(".");
+  const numericDate = (ms) => dottedDate(ymd(ms));
   const clock = (ms) => local(ms).toISOString().slice(11, 16);
   const midnight = (date) => Date.parse(date + "T00:00:00.000Z") - offset * 1000;
   const addDays = (date, n) => ymd(midnight(date) + n * 86400000);
@@ -41,17 +42,19 @@ function run(input) {
     [today, tomorrow].forEach((target) => {
       if (target < startDate || target > lastDate) return;
       const occurs = midnight(target);
+      const dateMs = (multi || e.all_day) ? occurs : startMs;
+      // Multi-day events sit above all-day events; ties stay alphabetical.
+      const sortMs = multi ? occurs - 1000 : dateMs;
       const event = {
         title: clip(e.summary, 100),
-        date_time: new Date((multi || e.all_day) ? occurs : startMs).toISOString(),
-        // Multi-day events sit above all-day events; ties stay alphabetical.
-        sort_time: new Date(multi ? occurs - 1000 : e.all_day ? occurs : startMs).toISOString()
+        date_time: new Date(dateMs).toISOString(),
+        sort_time: new Date(sortMs).toISOString()
       };
       const description = clip(e.description, 200);
       if (description) event.description = description;
       if (multi) {
         event.range = e.all_day
-          ? numericDate(startMs) + " - " + numericDate(midnight(lastDate))
+          ? dottedDate(startDate) + " - " + dottedDate(lastDate)
           : numericDate(startMs) + ", " + clock(startMs) + " - " +
             numericDate(endMs) + ", " + clock(endMs);
       } else if (!e.all_day) {

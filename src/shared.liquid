@@ -1,9 +1,9 @@
 {% assign offset = trmnl.user.utc_offset | default: 0 %}
-{% assign base_ts = trmnl.system.timestamp_utc | default: 0 %}
-{% assign today = base_ts | plus: offset | date: "%Y-%m-%d" %}
-{% assign tomorrow = base_ts | plus: 86400 | plus: offset | date: "%Y-%m-%d" %}
-{% assign today_label = base_ts | plus: offset | date: "%B %-d" %}
-{% assign tomorrow_label = base_ts | plus: 86400 | plus: offset | date: "%B %-d" %}
+{% assign local_ts = trmnl.system.timestamp_utc | default: 0 | plus: offset %}
+{% assign today = local_ts | date: "%Y-%m-%d" %}
+{% assign tomorrow = local_ts | plus: 86400 | date: "%Y-%m-%d" %}
+{% assign today_label = local_ts | date: "%B %-d" %}
+{% assign tomorrow_label = local_ts | plus: 86400 | date: "%B %-d" %}
 {% assign dated_reminders = reminders | where: "due_date" %}
 
 {% template item %}
@@ -94,7 +94,7 @@
 
 {% template title_bar %}
 <div class="title_bar">
-  <img class="image" src="https://trmnl.com/images/plugins/trmnl--render.svg">
+  <img class="image image--adaptive" src="https://trmnl.com/images/plugins/trmnl--render.svg">
   <span class="title">{{ name | escape }}</span>
 </div>
 {% endtemplate %}
