@@ -32,7 +32,7 @@ function run(input) {
     let lastDate = startDate;
     if (Number.isFinite(endMs)) {
       const endDate = ymd(endMs);
-      lastDate = e.all_day || atMidnight(endMs) ? addDays(endDate, -1) : endDate;
+      lastDate = (e.all_day || atMidnight(endMs)) ? addDays(endDate, -1) : endDate;
       if (lastDate < startDate) lastDate = startDate;
     }
     const multi = lastDate > startDate;
