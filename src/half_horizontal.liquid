@@ -1,17 +1,16 @@
 <div class="layout layout--top">
   <div class="columns" style="height:100%;align-items:stretch">
-    <div class="column">
+    <div class="column" style="justify-content:flex-start">
       <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
         {% render "day_items", target: today, heading: today_label, events: events, reminders: rs, offset: offset %}
         {% render "today_extras", events: events, dated: rs, all: reminders, offset: offset, today: today %}
       </div>
     </div>
-    <div class="column">
+    <div class="column" style="justify-content:flex-start">
       <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
         {% render "day_items", target: tomorrow, heading: tomorrow_label, events: events, reminders: rs, offset: offset %}
       </div>
     </div>
   </div>
 </div>
-{% capture debug %}ec={{ events.size }} rc={{ rs.size }} all={{ reminders.size }} last={{ rs.last.title }}{% endcapture %}
-{% render "title_bar", name: trmnl.plugin_settings.instance_name, debug: debug %}
+{% render "title_bar", name: trmnl.plugin_settings.instance_name %}

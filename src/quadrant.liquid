@@ -1,5 +1,5 @@
 <div class="layout layout--top">
-  <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
+  <div class="list h--full" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
     {% render "day_items", target: today, heading: today_label, events: events, reminders: rs, offset: offset %}
     {% render "today_extras", events: events, dated: rs, all: reminders, offset: offset, today: today %}
   </div>
