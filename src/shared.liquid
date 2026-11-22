@@ -1,0 +1,92 @@
+{% assign offset = trmnl.user.utc_offset | default: 0 %}
+{% assign base_ts = trmnl.system.timestamp_utc | default: 0 %}
+{% assign today = base_ts | plus: offset | date: "%Y-%m-%d" %}
+{% assign tomorrow = base_ts | plus: 86400 | plus: offset | date: "%Y-%m-%d" %}
+{% assign today_label = base_ts | plus: offset | date: "%B %-d" %}
+{% assign tomorrow_label = base_ts | plus: 86400 | plus: offset | date: "%B %-d" %}
+{% assign rs = reminders | where: "due_date" %}
+
+{% template item %}
+<div class="item">
+  <div class="meta">
+    {% if item.date_time %}
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="1.5" y="2.5" width="13" height="12" rx="1.5"></rect>
+        <path d="M1.5 6.5h13"></path>
+        <path d="M5.5 1v3M10.5 1v3"></path>
+      </svg>
+    {% else %}
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>
+    {% endif %}
+  </div>
+  <div class="content">
+    <span class="title title--small">{{ item.prefix }}{{ item.title | escape }}</span>
+    {% if item.description %}<span class="description">{{ item.description | escape }}</span>{% endif %}
+    {% assign item_label = label | default: item.range | default: item.time_label | default: item.due_time_label %}
+    {% if item_label %}
+      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ item_label | escape }}</span></div>
+    {% endif %}
+  </div>
+</div>
+{% endtemplate %}
+
+{% template day_items %}
+<span class="label">{{ heading }}</span>
+{% assign event_index = 0 %}
+{% assign reminder_index = 0 %}
+{% assign event_count = events.size %}
+{% assign reminder_count = reminders.size %}
+{% assign total = event_count | plus: reminder_count %}
+{% for n in (1..total) %}
+  {% assign take_event = event_index < event_count %}
+  {% if take_event and reminder_index < reminder_count %}
+    {% if reminders[reminder_index].due_date < events[event_index].sort_time %}
+      {% assign take_event = false %}
+    {% endif %}
+  {% endif %}
+  {% if take_event %}
+    {% assign cur = events[event_index] %}
+    {% assign event_index = event_index | plus: 1 %}
+  {% else %}
+    {% assign cur = reminders[reminder_index] %}
+    {% assign reminder_index = reminder_index | plus: 1 %}
+  {% endif %}
+  {% assign local_date = cur.date_time | default: cur.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+  {% if local_date == target %}
+    {% render "item", item: cur %}
+  {% endif %}
+{% endfor %}
+{% endtemplate %}
+
+{% template today_extras %}
+{% assign overdue_count = 0 %}
+{% assign today_count = 0 %}
+{% for e in events %}
+  {% assign ed = e.date_time | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+  {% if ed == today %}{% assign today_count = today_count | plus: 1 %}{% endif %}
+{% endfor %}
+{% for r in dated %}
+  {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+  {% if rd < today %}{% assign overdue_count = overdue_count | plus: 1 %}{% endif %}
+  {% if rd == today %}{% assign today_count = today_count | plus: 1 %}{% endif %}
+{% endfor %}
+{% assign dateless_count = all.size | minus: dated.size %}
+{% if today_count > 0 and (overdue_count > 0 or dateless_count > 0) %}<div class="divider"></div>{% endif %}
+{% assign overdue = dated | reverse %}
+{% for r in overdue %}
+  {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+  {% if rd < today %}{% render "item", item: r, label: r.due_date_label %}{% endif %}
+{% endfor %}
+{% if overdue_count > 0 and dateless_count > 0 %}<div class="divider"></div>{% endif %}
+{% for r in all %}
+  {% unless r.due_date %}{% render "item", item: r %}{% endunless %}
+{% endfor %}
+{% endtemplate %}
+
+{% template title_bar %}
+<div class="title_bar">
+  <img class="image" src="https://trmnl.com/images/plugins/trmnl--render.svg">
+  <span class="title">{{ name | escape }}</span>
+  <span class="instance"></span>
+</div>
+{% endtemplate %}

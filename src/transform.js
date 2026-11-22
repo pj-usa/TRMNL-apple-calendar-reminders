@@ -2,10 +2,6 @@ function run(input) {
   const user = (input && input.trmnl && input.trmnl.user) || {};
   const offset = user.utc_offset || 0;
   const ymd = (ms) => new Date(ms + offset * 1000).toISOString().slice(0, 10);
-  const day = (s) => {
-    const ms = Date.parse(s);
-    return Number.isFinite(ms) ? ymd(ms) : "";
-  };
   const now = Date.now();
   const today = ymd(now);
   const tomorrow = ymd(now + 86400000);
@@ -21,7 +17,9 @@ function run(input) {
   const addDays = (date, n) => ymd(midnight(date) + n * 86400000);
   const atMidnight = (ms) => {
     const d = new Date(ms + offset * 1000);
-    return d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() + d.getUTCMilliseconds() === 0;
+    return (
+      d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() + d.getUTCMilliseconds() === 0
+    );
   };
 
   const events = [];
@@ -44,7 +42,7 @@ function run(input) {
       const occurs = midnight(target);
       const event = {
         title: clip(e.summary, 100),
-        date_time: new Date(multi || e.all_day ? occurs : startMs).toISOString(),
+        date_time: new Date((multi || e.all_day) ? occurs : startMs).toISOString(),
         // Multi-day events sit above all-day events; ties stay alphabetical.
         sort_time: new Date(multi ? occurs - 1000 : e.all_day ? occurs : startMs).toISOString()
       };
@@ -53,42 +51,46 @@ function run(input) {
       if (multi) {
         event.range = e.all_day
           ? numericDate(startMs) + " - " + numericDate(midnight(lastDate))
-          : numericDate(startMs) + ", " + clock(startMs) + " - " + numericDate(endMs) + ", " + clock(endMs);
+          : numericDate(startMs) + ", " + clock(startMs) + " - " +
+            numericDate(endMs) + ", " + clock(endMs);
       } else if (!e.all_day) {
-        event.time_label = clock(startMs) + (Number.isFinite(endMs) ? " - " + clock(endMs) : "");
+        event.time_label =
+          clock(startMs) + (Number.isFinite(endMs) ? " - " + clock(endMs) : "");
       }
       events.push(event);
     });
   });
-  events.sort((a, b) => a.sort_time.localeCompare(b.sort_time) || a.title.localeCompare(b.title));
+  events.sort(
+    (a, b) => a.sort_time.localeCompare(b.sort_time) || a.title.localeCompare(b.title)
+  );
 
-  const reminders = ((input && input.reminders) || [])
-    .filter((r) => {
-      const d = day(r.due_date);
-      // Keep unparseable due dates visible as dateless instead of dropping the reminder.
-      return !r.due_date || !d || d <= tomorrow;
-    })
-    .map((r) => {
-      const dueDate = day(r.due_date);
-      const due = dueDate ? text(r.due_date) : "";
-      const dueMs = due ? Date.parse(due) : NaN;
-      const p = prefix(Number(r.priority));
-      const description = clip(r.notes, 200);
-      const reminder = { title: clip(r.title, 100) };
-      if (due) {
-        reminder.due_date = due;
-        if (atMidnight(dueMs)) {
-          reminder.due_date_label = numericDate(dueMs);
-        } else {
-          if (dueDate === today || dueDate === tomorrow) reminder.due_time_label = clock(dueMs);
-          reminder.due_date_label = numericDate(dueMs) + ", " + clock(dueMs);
-        }
+  const reminders = [];
+  ((input && input.reminders) || []).forEach((r) => {
+    const dueMs = Date.parse(r.due_date);
+    const dueDate = Number.isFinite(dueMs) ? ymd(dueMs) : "";
+    // Keep unparseable due dates visible as dateless instead of dropping the reminder.
+    if (dueDate && dueDate > tomorrow) return;
+
+    const reminder = { title: clip(r.title, 100) };
+    if (dueDate) {
+      // Normalize so Liquid can compare due_date with event sort_time.
+      reminder.due_date = new Date(dueMs).toISOString();
+      if (atMidnight(dueMs)) {
+        reminder.due_date_label = numericDate(dueMs);
+      } else {
+        if (dueDate === today || dueDate === tomorrow) reminder.due_time_label = clock(dueMs);
+        reminder.due_date_label = numericDate(dueMs) + ", " + clock(dueMs);
       }
-      if (p) reminder.prefix = p;
-      if (description) reminder.description = description;
-      return reminder;
-    });
-  reminders.sort((a, b) => (a.due_date || "").localeCompare(b.due_date || "") || a.title.localeCompare(b.title));
+    }
+    const p = prefix(Number(r.priority));
+    if (p) reminder.prefix = p;
+    const description = clip(r.notes, 200);
+    if (description) reminder.description = description;
+    reminders.push(reminder);
+  });
+  reminders.sort(
+    (a, b) => (a.due_date || "").localeCompare(b.due_date || "") || a.title.localeCompare(b.title)
+  );
 
   return { events, reminders };
 }

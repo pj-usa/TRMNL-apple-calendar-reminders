@@ -1,137 +1,16 @@
-{% assign offset = trmnl.user.utc_offset | default: 0 %}
-{% assign base_ts = trmnl.system.timestamp_utc | default: 0 %}
-{% assign today = base_ts | plus: offset | date: "%Y-%m-%d" %}
-{% assign tomorrow = base_ts | plus: 86400 | plus: offset | date: "%Y-%m-%d" %}
-{% assign today_label = base_ts | plus: offset | date: "%B %-d" %}
-{% assign tomorrow_label = base_ts | plus: 86400 | plus: offset | date: "%B %-d" %}
-{% assign overdue_count = 0 %}
-{% for r in reminders %}
-  {% if r.due_date %}
-    {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-    {% if rd < today %}{% assign overdue_count = overdue_count | plus: 1 %}{% endif %}
-  {% endif %}
-{% endfor %}
-{% assign dateless_count = 0 %}
-{% for r in reminders %}
-  {% unless r.due_date %}{% assign dateless_count = dateless_count | plus: 1 %}{% endunless %}
-{% endfor %}
-{% assign today_count = 0 %}
-{% for e in events %}
-  {% assign ed = e.date_time | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-  {% if ed == today %}{% assign today_count = today_count | plus: 1 %}{% endif %}
-{% endfor %}
-{% for r in reminders %}
-  {% if r.due_date %}
-    {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-    {% if rd == today %}{% assign today_count = today_count | plus: 1 %}{% endif %}
-  {% endif %}
-{% endfor %}
-{% assign es = events %}
-{% assign rs = reminders | where: "due_date" %}
-{% capture reminder_icon %}<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"></circle></svg>{% endcapture %}
 <div class="layout layout--top">
   <div class="columns">
-    {% for pass in (1..2) %}
-      {% if pass == 1 %}{% assign target = today %}{% else %}{% assign target = tomorrow %}{% endif %}
-      <div class="column">
-        <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
-          <span class="label">{% if pass == 1 %}{{ today_label }}{% else %}{{ tomorrow_label }}{% endif %}</span>
-
-          {% assign ei = 0 %}
-          {% assign ri = 0 %}
-          {% assign etot = es.size %}
-          {% assign rtot = rs.size %}
-          {% assign total = etot | plus: rtot %}
-          {% for n in (1..total) %}
-            {% if ei < etot and ri < rtot %}
-              {% assign et = es[ei].sort_time %}
-              {% assign rt = rs[ri].due_date %}
-              {% if rt < et %}
-                {% assign cur = rs[ri] %}
-                {% assign ri = ri | plus: 1 %}
-                {% assign kind = "reminder" %}
-              {% else %}
-                {% assign cur = es[ei] %}
-                {% assign ei = ei | plus: 1 %}
-                {% assign kind = "event" %}
-              {% endif %}
-            {% elsif ei < etot %}
-              {% assign cur = es[ei] %}
-              {% assign ei = ei | plus: 1 %}
-              {% assign kind = "event" %}
-            {% elsif ri < rtot %}
-              {% assign cur = rs[ri] %}
-              {% assign ri = ri | plus: 1 %}
-              {% assign kind = "reminder" %}
-            {% endif %}
-            {% assign cd = cur.date_time | default: cur.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-            {% if cd == target %}
-              <div class="item">
-                <div class="meta">
-                  {% if kind == "event" %}
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <rect x="1.5" y="2.5" width="13" height="12" rx="1.5"></rect>
-                      <path d="M1.5 6.5h13"></path>
-                      <path d="M5.5 1v3M10.5 1v3"></path>
-                    </svg>
-                  {% else %}
-                    {{ reminder_icon }}
-                  {% endif %}
-                </div>
-                <div class="content">
-                  <span class="title title--small">{{ cur.prefix }}{{ cur.title | escape }}</span>
-                  {% if cur.description %}<span class="description">{{ cur.description | escape }}</span>{% endif %}
-                  {% assign item_label = cur.range | default: cur.time_label | default: cur.due_time_label %}
-                  {% if item_label %}
-                    <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ item_label | escape }}</span></div>
-                  {% endif %}
-                </div>
-              </div>
-            {% endif %}
-          {% endfor %}
-
-          {% if pass == 1 %}
-            {% if today_count > 0 and (overdue_count > 0 or dateless_count > 0) %}<div class="divider"></div>{% endif %}
-            {% assign rs_ovd = rs | reverse %}
-            {% for r in rs_ovd %}
-              {% assign rd = r.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
-              {% if rd < today %}
-                <div class="item">
-                  <div class="meta">
-                    {{ reminder_icon }}
-                  </div>
-                  <div class="content">
-                    <span class="title title--small">{{ r.prefix }}{{ r.title | escape }}</span>
-                    {% if r.description %}<span class="description">{{ r.description | escape }}</span>{% endif %}
-                    {% if r.due_date_label %}
-                      <div class="flex gap--xsmall"><span class="label label--small label--underline">{{ r.due_date_label | escape }}</span></div>
-                    {% endif %}
-                  </div>
-                </div>
-              {% endif %}
-            {% endfor %}
-            {% if overdue_count > 0 and dateless_count > 0 %}<div class="divider"></div>{% endif %}
-            {% for r in reminders %}
-              {% unless r.due_date %}
-                <div class="item">
-                  <div class="meta">
-                    {{ reminder_icon }}
-                  </div>
-                  <div class="content">
-                    <span class="title title--small">{{ r.prefix }}{{ r.title | escape }}</span>
-                    {% if r.description %}<span class="description">{{ r.description | escape }}</span>{% endif %}
-                  </div>
-                </div>
-              {% endunless %}
-            {% endfor %}
-          {% endif %}
-        </div>
+    <div class="column">
+      <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
+        {% render "day_items", target: today, heading: today_label, events: events, reminders: rs, offset: offset %}
+        {% render "today_extras", events: events, dated: rs, all: reminders, offset: offset, today: today %}
       </div>
-    {% endfor %}
+    </div>
+    <div class="column">
+      <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
+        {% render "day_items", target: tomorrow, heading: tomorrow_label, events: events, reminders: rs, offset: offset %}
+      </div>
+    </div>
   </div>
 </div>
-<div class="title_bar">
-  <img class="image" src="https://trmnl.com/images/plugins/trmnl--render.svg">
-  <span class="title">{{ trmnl.plugin_settings.instance_name | escape }}</span>
-  <span class="instance"></span>
-</div>
+{% render "title_bar", name: trmnl.plugin_settings.instance_name %}
