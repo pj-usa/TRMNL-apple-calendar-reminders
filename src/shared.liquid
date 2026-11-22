@@ -56,6 +56,15 @@
     {% render "item", item: cur %}
   {% endif %}
 {% endfor %}
+{% comment %}Tail flush: render anything a future for-loop cap left unconsumed.{% endcomment %}
+{% for event in events offset: event_index %}
+  {% assign local_date = event.date_time | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+  {% if local_date == target %}{% render "item", item: event %}{% endif %}
+{% endfor %}
+{% for reminder in reminders offset: reminder_index %}
+  {% assign local_date = reminder.due_date | date: "%s" | plus: offset | date: "%Y-%m-%d" %}
+  {% if local_date == target %}{% render "item", item: reminder %}{% endif %}
+{% endfor %}
 {% endtemplate %}
 
 {% template today_extras %}
@@ -87,6 +96,6 @@
 <div class="title_bar">
   <img class="image" src="https://trmnl.com/images/plugins/trmnl--render.svg">
   <span class="title">{{ name | escape }}</span>
-  <span class="instance"></span>
+  <span class="instance">{{ debug }}</span>
 </div>
 {% endtemplate %}

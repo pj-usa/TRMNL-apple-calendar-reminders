@@ -1,5 +1,5 @@
 <div class="layout layout--top">
-  <div class="columns">
+  <div class="columns" style="height:100%;align-items:stretch">
     <div class="column">
       <div class="list" data-overflow="true" data-overflow-counter="true" data-overflow-max-cols="1">
         {% render "day_items", target: today, heading: today_label, events: events, reminders: rs, offset: offset %}
@@ -13,4 +13,5 @@
     </div>
   </div>
 </div>
-{% render "title_bar", name: trmnl.plugin_settings.instance_name %}
+{% capture debug %}ec={{ events.size }} rc={{ rs.size }} all={{ reminders.size }} last={{ rs.last.title }}{% endcapture %}
+{% render "title_bar", name: trmnl.plugin_settings.instance_name, debug: debug %}
