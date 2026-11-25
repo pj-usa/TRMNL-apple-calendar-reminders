@@ -1,0 +1,42 @@
+name: Bug report
+description: Report something that does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened?
+      description: What the screen showed, and what you expected instead.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layout
+    attributes:
+      label: Layout
+      options:
+        - Full
+        - Half-horizontal
+        - Half-vertical
+        - Quadrant
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device
+      options:
+        - TRMNL (OG)
+        - TRMNL (X)
+        - Frame
+        - BYOS
+    validations:
+      required: true
+
+  - type: textarea
+    id: payload
+    attributes:
+      label: Payload
+      description: The JSON you pushed, with personal details replaced.
+      render: json
