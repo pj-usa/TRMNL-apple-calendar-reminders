@@ -1,19 +1,27 @@
 # Apple Calendar & Reminders
 
-A [TRMNL](https://trmnl.com) plugin for ePaper displays, connected by
-[GitHub Sync](https://help.trmnl.com/en/articles/15977899-github-sync): every save in TRMNL lands here as a commit.
+A simple, native-looking TRMNL plugin that displays your Apple Calendar events and Reminders for today and tomorrow.
+
+## Layouts
+
+- Full and half-horizontal: today and tomorrow, side by side.
+- Half-vertical and quadrant: today only.
+- Today also shows overdue and undated reminders.
+
+## Installation
 
 <img width="150" alt="image" src="https://trmnl.com/images/brand/badges/light/works-with-trmnl/trmnl-badge-works-with-light.svg" />
 
-### Develop locally
+1. Fork this plugin from the TRMNL plugin directory.
+2. In the [TRMNL Companion](https://apps.apple.com/us/app/trmnl-companion/id6752111280) app, select this plugin and enable Calendar and Reminders.
 
-Templates and settings live in [`src/`](src/), ready for [trmnlp](https://github.com/usetrmnl/trmnlp):
+Forking a recipe and pushing to a webhook require the [Developer edition](https://help.trmnl.com/en/articles/12410549-developer-edition-features) add-on.
 
-```sh
-gem install trmnl_preview
-trmnlp serve
-```
+## Feedback
 
-### Discoverability
+- Report a bug: [open an issue](https://github.com/pj-usa/TRMNL-apple-calendar-reminders/issues/new?template=bug_report.yml)
+- Suggest a feature: [open an issue](https://github.com/pj-usa/TRMNL-apple-calendar-reminders/issues/new?template=feature_request.yml)
 
-Add the `trmnl` topic to this repo so other TRMNL plugin builders can find it.
+## AI disclosure
+
+I used AI as a coding assistant, not as a complete replacement.
