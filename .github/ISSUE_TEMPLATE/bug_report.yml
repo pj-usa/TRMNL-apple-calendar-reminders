@@ -16,8 +16,8 @@ body:
       label: Layout
       options:
         - Full
-        - Half-horizontal
-        - Half-vertical
+        - Half Horizontal
+        - Half Vertical
         - Quadrant
     validations:
       required: true
