@@ -13,7 +13,7 @@ A simple, native-looking TRMNL plugin that displays your Apple Calendar events a
 <img width="150" alt="Works with TRMNL" src="https://trmnl.com/images/brand/badges/light/works-with-trmnl/trmnl-badge-works-with-light.svg" />
 
 1. Fork this plugin from the TRMNL plugin directory.
-2. In the [TRMNL Companion](https://apps.apple.com/us/app/trmnl-companion/id6752111280) app, select this plugin and enable Calendar and Reminders.
+2. In the [TRMNL Companion](https://apps.apple.com/us/app/trmnl-companion/id6752111280) app, select this plugin and choose which calendars and reminder lists to share.
 
 Forking a recipe and pushing to a webhook require the [Developer edition](https://help.trmnl.com/en/articles/12410549-developer-edition-features) add-on.
 
