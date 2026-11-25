@@ -1,6 +1,6 @@
 # Apple Calendar & Reminders
 
-A simple, native-looking TRMNL plugin that displays your Apple Calendar events and Reminders at a glance.
+A simple, native-looking TRMNL plugin that displays your Apple Calendar events and Reminders for today and tomorrow.
 
 ## Layouts
 
