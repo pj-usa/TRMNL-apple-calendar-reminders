@@ -1,0 +1,17 @@
+name: Feature request
+description: Suggest a change or a new option
+labels: [enhancement]
+body:
+  - type: textarea
+    id: wanted
+    attributes:
+      label: Description
+      description: What should the plugin do that it does not do today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solves
+    attributes:
+      label: Use case
+      description: What you are trying to do with it.
