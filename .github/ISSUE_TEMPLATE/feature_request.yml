@@ -6,7 +6,7 @@ body:
     id: wanted
     attributes:
       label: Description
-      description: What is missing today.
+      description: What is missing.
     validations:
       required: true
 
