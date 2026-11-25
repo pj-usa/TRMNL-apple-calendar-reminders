@@ -6,7 +6,7 @@ body:
     id: happened
     attributes:
       label: Description
-      description: What the screen showed, and what you expected instead.
+      description: What the plugin did, and what you expected instead.
     validations:
       required: true
 
@@ -29,6 +29,7 @@ body:
       options:
         - TRMNL (OG)
         - TRMNL (X)
+        - TRMNL (BWRY)
         - Frame
         - BYOS
     validations:
